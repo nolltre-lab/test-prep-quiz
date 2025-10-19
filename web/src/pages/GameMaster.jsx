@@ -14,13 +14,37 @@ export default function GameMaster(){
   const [q,setQ] = useState(null);
   const [reveal,setReveal] = useState(null);
 
+  // local mirror for index/total from question:new (works even if server room:update lacks them)
+  const [qIx, setQIx] = useState(-1);
+  const [qTotal, setQTotal] = useState(0);
+
+  // lightweight ticking clock so the UI timer counts down smoothly
+  const [now, setNow] = useState(Date.now());
+  useEffect(()=>{ const id=setInterval(()=>setNow(Date.now()), 250); return ()=>clearInterval(id); },[]);
+  const timeLeft = room?.status === "question"
+    ? Math.max(0, Math.round((room.endsAt - now)/1000))
+    : 0;
+
   useEffect(()=>{ listPacks().then(setPacks); },[]);
 
+  const selected = packs.find(p=>p.file===packFile);
+  const maxQ = selected?.count || 1;
+
   useEffect(()=>{
-    const onUpdate = (r)=> setRoom(r);
-    const onNew = (payload)=>{ setQ(payload.q); setReveal(null); };
+    const onUpdate = (r)=> {
+      setRoom(r);
+      // If server includes ix/total here, keep our mirrors in sync too
+      if (typeof r?.ix === "number") setQIx(r.ix);
+      if (typeof r?.total === "number") setQTotal(r.total);
+    };
+    const onNew = (payload)=>{
+      setQ(payload.q);
+      setReveal(null);
+      if (typeof payload.ix === "number") setQIx(payload.ix);
+      if (typeof payload.total === "number") setQTotal(payload.total);
+    };
     const onReveal = (payload)=> setReveal(payload);
-    const onEnd = ()=>{ setQ(null); setReveal(null); alert("Game finished!"); };
+    const onEnd = ()=>{ setQ(null); setReveal(null); setQIx(-1); setQTotal(0); alert("Game finished!"); };
 
     socket.on("room:update", onUpdate);
     socket.on("question:new", onNew);
@@ -36,17 +60,17 @@ export default function GameMaster(){
 
   const createRoom = ()=>{
     if(!packFile) return alert("Choose a pack");
-    socket.emit("gm:create", { packFile, durationSec, totalQuestions }, (res)=>{
+    // clamp before sending
+    const wanted = Math.max(1, Math.min(maxQ, Number(totalQuestions||maxQ)));
+    socket.emit("gm:create", { packFile, durationSec, totalQuestions: wanted }, (res)=>{
       if(!res?.ok) return alert("Create failed");
-      // state will sync via room:update
+      // room state will sync via room:update
     });
   };
   const start = ()=> socket.emit("gm:start", { code: room?.code }, ()=>{});
-  const next = ()=> socket.emit("gm:next", { code: room?.code }, ()=>{});
+  const next  = ()=> socket.emit("gm:next",  { code: room?.code }, ()=>{});
 
-  // find selected pack to bound the input
-  const selected = packs.find(p=>p.file===packFile);
-  const maxQ = selected?.count || 1;
+  const currentNumber = qIx >= 0 ? qIx + 1 : 0;
 
   return (
     <div>
@@ -88,10 +112,11 @@ export default function GameMaster(){
       {room && (
         <>
           <div style={{marginTop:12,display:"flex",gap:12,flexWrap:"wrap",alignItems:"center"}}>
-            <span style={{background:"#12172b",border:"1px solid #242b4a",padding:"6px 10px",borderRadius:10}}>Room: <strong>{room.code}</strong></span>
-            <span style={{background:"#12172b",border:"1px solid #242b4a",padding:"6px 10px",borderRadius:10}}>Pack: {room.packTitle}</span>
-            <span style={{background:"#12172b",border:"1px solid #242b4a",padding:"6px 10px",borderRadius:10}}>Players: {room.players?.length || 0}</span>
-            <span style={{background:"#12172b",border:"1px solid #242b4a",padding:"6px 10px",borderRadius:10}}>Total Q: {room.total || room?.players /* fallback no-op */}</span>
+            <Pill>Room: <strong>{room.code}</strong></Pill>
+            <Pill>Pack: {room.packTitle}</Pill>
+            <Pill>Players: {room.players?.length || 0}</Pill>
+            <Pill>Q {currentNumber} / {qTotal || room.total || 0}</Pill>
+            {room.status === "question" && <Pill>⏳ {timeLeft}s</Pill>}
           </div>
 
           <div style={{marginTop:12,display:"flex",gap:10,flexWrap:"wrap"}}>
@@ -102,11 +127,15 @@ export default function GameMaster(){
 
           {q && (
             <div style={{marginTop:12}}>
-              <QuestionCard q={q} disabled revealIndex={reveal?.correctIndex}/>
-              <div style={{marginTop:8,opacity:.8}}>
-                {room.status==="question" ? <>Time left: <strong>{Math.max(0, Math.round((room.endsAt - Date.now())/1000))}s</strong></> :
-                reveal?.winner ? <>Winner: <strong style={{color:"#6ee7b7"}}>{reveal.winner}</strong></> : <>No correct answer.</>}
-              </div>
+              <QuestionCard
+                q={q}
+                disabled
+                revealIndex={reveal?.correctIndex}
+                // optional props if your QuestionCard supports showing them
+                timeLeft={room.status === "question" ? timeLeft : undefined}
+                qIndex={qIx}
+                qTotal={qTotal || room.total}
+              />
             </div>
           )}
 
@@ -114,5 +143,18 @@ export default function GameMaster(){
         </>
       )}
     </div>
+  );
+}
+
+function Pill({children}) {
+  return (
+    <span style={{
+      background:"#12172b",
+      border:"1px solid #242b4a",
+      padding:"6px 10px",
+      borderRadius:10
+    }}>
+      {children}
+    </span>
   );
 }

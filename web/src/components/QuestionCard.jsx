@@ -5,16 +5,18 @@ import React from "react";
  *  - q: { front, choices[] }
  *  - onChoose?: (idx)=>void
  *  - disabled?: boolean
- *  - revealIndex?: number|null
- *  - timeLeft?: number   // OPTIONAL: seconds remaining (live)
- *  - qIndex?: number     // OPTIONAL: 0-based current question index
- *  - qTotal?: number     // OPTIONAL: total questions in game
+ *  - revealIndex?: number|null   // correct answer (green) when revealed
+ *  - wrongIndex?: number|null    // player's wrong guess (red) before reveal
+ *  - timeLeft?: number           // OPTIONAL: seconds remaining (live)
+ *  - qIndex?: number             // OPTIONAL: 0-based current question index
+ *  - qTotal?: number             // OPTIONAL: total questions in game
  */
 export default function QuestionCard({
   q,
   onChoose,
   disabled = false,
   revealIndex = null,
+  wrongIndex = null,
   timeLeft,
   qIndex,
   qTotal,
@@ -50,6 +52,7 @@ export default function QuestionCard({
         {q.choices.map((c, idx) => {
           const isReveal = revealIndex !== null;
           const isCorrect = isReveal && idx === revealIndex;
+          const isWrong = !isReveal && wrongIndex !== null && idx === wrongIndex;
 
           return (
             <button
@@ -63,7 +66,11 @@ export default function QuestionCard({
                 padding:"12px",
                 borderRadius:10,
                 cursor: (disabled || isReveal) ? "default" : "pointer",
-                outline: isCorrect ? "2px solid #6ee7b7" : "none",
+                outline: isCorrect
+                  ? "2px solid #6ee7b7"  // ✅ green on reveal
+                  : isWrong
+                  ? "2px solid #ff6b6b"  // 🔴 red on wrong guess
+                  : "none",
                 color:"#e8ebff"
               }}
             >

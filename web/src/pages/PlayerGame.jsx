@@ -12,6 +12,7 @@ export default function PlayerGame(){
   const [q,setQ] = useState(null);
   const [reveal,setReveal] = useState(null);
   const [locked,setLocked] = useState(false);
+  const [wrongIndex, setWrongIndex] = useState(null); // 🔴 track wrong choice
 
   // ticking UI clock
   const [now, setNow] = useState(Date.now());
@@ -29,7 +30,7 @@ export default function PlayerGame(){
     });
 
     const onUpdate = (r)=> setRoom(r);
-    const onNew = (payload)=>{ setQ(payload.q); setLocked(false); setReveal(null); };
+    const onNew = (payload)=>{ setQ(payload.q); setLocked(false); setReveal(null); setWrongIndex(null); };
     const onReveal = (payload)=>{ setReveal(payload); setLocked(true); };
     const onEnd = ()=>{ alert("Game finished!"); nav("/play"); };
 
@@ -49,8 +50,13 @@ export default function PlayerGame(){
   const answer = (idx)=>{
     if(locked) return;
     setLocked(true);
+    setWrongIndex(null); // clear before we know
     socket.emit("player:answer", { code, choiceIndex: idx }, (res)=>{
-      if(!res?.ok){ /* ignore */ }
+      if(!res?.ok){ return; }
+      if(res.correct === false){         // 🔴 show immediate red outline
+        setWrongIndex(idx);
+      }
+      // if correct, server will soon emit question:reveal which paints green
     });
   };
 
@@ -72,6 +78,7 @@ export default function PlayerGame(){
             onChoose={answer}
             disabled={locked}
             revealIndex={reveal?.correctIndex}
+            wrongIndex={wrongIndex}                // 🔴 pass wrong choice
             timeLeft={room?.status === "question" ? timeLeft : undefined}
             qIndex={room?.ix}
             qTotal={room?.total}
