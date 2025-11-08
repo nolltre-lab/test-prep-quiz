@@ -1,3 +1,5 @@
+import React from "react";
+
 export function ThemeOverlay({ effects }) {
   if (!effects) return null;
 
