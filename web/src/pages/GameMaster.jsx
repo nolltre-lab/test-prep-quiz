@@ -86,6 +86,7 @@ export default function GameMaster(){
 
   const [themes,setThemes] = useState([]);
   const [themeName,setThemeName] = useState("classic");
+  const [isPublic,setIsPublic] = useState(true);
 
   const [room,setRoom] = useState(null);
   const [q,setQ] = useState(null);
@@ -136,7 +137,7 @@ export default function GameMaster(){
 
   const createRoom = ()=>{
     if(!packFile) return alert("Choose a pack");
-    socket.emit("gm:create", { packFile, durationSec, totalQuestions, themeName }, (res)=>{
+    socket.emit("gm:create", { packFile, durationSec, totalQuestions, themeName, isPublic }, (res)=>{
       if(!res?.ok) return alert("Create failed");
       // state will sync via room:update
     });
@@ -197,6 +198,18 @@ export default function GameMaster(){
               {themes.map(t => <option key={t.file} value={t.name}>{t.name}</option>)}
             </select>
             <div style={{fontSize:"var(--font-xs, 12px)",opacity:.6,marginTop:"var(--spacing-xs, 6px)"}}>Applies to GM & all players in this room</div>
+          </div>
+
+          <div style={{gridColumn:"1 / -1"}}>
+            <label style={{display:"flex",alignItems:"center",gap:"var(--spacing-md, 10px)",cursor:"pointer"}}>
+              <input type="checkbox" checked={isPublic} onChange={e=>setIsPublic(e.target.checked)}
+                     className="touch-target"
+                     style={{width:"24px",height:"24px",cursor:"pointer"}}/>
+              <div>
+                <div style={{fontSize:"var(--font-sm, 14px)",opacity:.8}}>Public room</div>
+                <div style={{fontSize:"var(--font-xs, 12px)",opacity:.6}}>Public rooms appear in the lobby list. Private rooms require manual code entry.</div>
+              </div>
+            </label>
           </div>
 
           <button onClick={createRoom}

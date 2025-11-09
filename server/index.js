@@ -114,7 +114,7 @@ const rooms = new Map(); // code -> room
 const genCode = () =>
   Array.from({ length: 6 }, () => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random()*33)]).join("");
 
-function makeRoom({ code, pack, items, theme }) {
+function makeRoom({ code, pack, items, theme, isPublic = true }) {
   return {
     code,
     createdAt: Date.now(),
@@ -130,6 +130,7 @@ function makeRoom({ code, pack, items, theme }) {
     gm: null,
     theme: theme || null, // full theme object
     totalOverride: null,  // optional if you carry total from GM; not used here
+    isPublic: isPublic,   // whether room appears in public lobby list
   };
 }
 
@@ -186,9 +187,33 @@ function buildChoices(q){
   return { ...q, choices, answerIndex: 0 };
 }
 
+function getPublicRooms() {
+  const publicRooms = [];
+  for (const room of rooms.values()) {
+    if (room.isPublic && room.status === "lobby") {
+      publicRooms.push({
+        code: room.code,
+        packTitle: room.packTitle,
+        playerCount: room.players.size,
+        theme: room.theme?.name || "classic",
+        createdAt: room.createdAt
+      });
+    }
+  }
+  return publicRooms;
+}
+
+function broadcastPublicRooms() {
+  const publicRooms = getPublicRooms();
+  io.emit("rooms:list", { rooms: publicRooms });
+}
+
 io.on("connection", (socket)=>{
+  // Send public rooms list on connection
+  socket.emit("rooms:list", { rooms: getPublicRooms() });
+
   // GM: create room (with theme)
-  socket.on("gm:create", async ({ packFile, durationSec, totalQuestions, themeName }, cb)=>{
+  socket.on("gm:create", async ({ packFile, durationSec, totalQuestions, themeName, isPublic }, cb)=>{
     try{
       const file = path.basename(packFile);
       const txt = await fs.readFile(path.join(PACKS_DIR, file), "utf8");
@@ -214,7 +239,7 @@ io.on("connection", (socket)=>{
       }
       items = idx.slice(0, total).map(i => items[i]);
 
-      const room = makeRoom({ code, pack: obj, items, theme });
+      const room = makeRoom({ code, pack: obj, items, theme, isPublic: isPublic !== false });
       room.packTitle = obj.title || file;
       room.durationSec = Math.max(5, Math.min(120, Number(durationSec||30)));
       room.gm = socket.id;
@@ -224,6 +249,7 @@ io.on("connection", (socket)=>{
 
       cb?.({ ok:true, code, packTitle: room.packTitle, count: room.items.length, durationSec: room.durationSec, theme: room.theme?.name });
       broadcastState(room);
+      broadcastPublicRooms(); // Notify all clients about new public room
     }catch(e){
       cb?.({ ok:false, error: "create_failed", detail: e.message });
     }
@@ -239,6 +265,7 @@ io.on("connection", (socket)=>{
       ix: room.ix, total: room.items.length, q: currentQuestion(room)
     });
     broadcastState(room);
+    broadcastPublicRooms(); // Room no longer in lobby - update public list
     cb?.({ ok:true });
   });
 
@@ -274,6 +301,7 @@ io.on("connection", (socket)=>{
       lastQ:-1
     });
     broadcastState(room);
+    broadcastPublicRooms(); // Player count changed - update public list
     cb?.({ ok:true, room:{ code:room.code, packTitle:room.packTitle }, theme: room.theme?.name });
   });
 
@@ -319,17 +347,23 @@ io.on("connection", (socket)=>{
 
   // Disconnect cleanup
   socket.on("disconnect", ()=>{
+    let needsBroadcast = false;
     for(const room of rooms.values()){
       if(room.gm === socket.id){
         clearTimeout(room.timer);
         io.to(room.code).emit("game:ended");
         rooms.delete(room.code);
+        needsBroadcast = true;
         break;
       }
       if(room.players.has(socket.id)){
         room.players.delete(socket.id);
         broadcastState(room);
+        needsBroadcast = true;
       }
+    }
+    if (needsBroadcast) {
+      broadcastPublicRooms(); // Update public list when players leave or rooms are deleted
     }
   });
 });
