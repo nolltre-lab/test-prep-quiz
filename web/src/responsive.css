@@ -224,6 +224,53 @@ body, p, h1, h2, h3, h4, h5, h6, span, div {
   }
 }
 
+/* Mobile layout for player game - prioritize question/answers */
+.player-game-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  gap: clamp(6px, 1vh, 12px);
+}
+
+.player-header {
+  flex-shrink: 0;
+  font-size: clamp(12px, 2vw, 14px);
+}
+
+.player-question-section {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px; /* Space for scrollbar */
+}
+
+.player-scoreboard-section {
+  flex-shrink: 0;
+  max-height: 25vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px; /* Space for scrollbar */
+}
+
+/* On tablets, give more space to scoreboard */
+@media (min-width: 768px) {
+  .player-scoreboard-section {
+    max-height: 35vh;
+  }
+}
+
+/* On large screens, more balanced */
+@media (min-width: 1200px) {
+  .player-scoreboard-section {
+    max-height: 45vh;
+  }
+
+  .player-game-container {
+    gap: var(--spacing-md);
+  }
+}
+
 /* Game Master mobile layout - stack vertically */
 .gm-game-view {
   display: flex;

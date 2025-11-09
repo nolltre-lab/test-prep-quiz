@@ -107,12 +107,12 @@ export default function PlayerGame(){
   const wrongIndex = !reveal && myAnswer !== null ? myAnswer : null;
 
   return (
-    <div style={{position:"relative", zIndex:1, maxWidth:"100%", height:"100%", display:"flex", flexDirection:"column", overflow:"auto"}}>
+    <div className="player-game-container" style={{position:"relative", zIndex:1, maxWidth:"100%"}}>
       {theme && <ThemeOverlay effects={theme.effects} />}
       <ConfettiBurst trigger={confettiTrigger} />
       <WinnerCelebration show={showWinnerCelebration} winnerName={name} />
 
-      <div style={{marginBottom:10,display:"flex",gap:10,flexWrap:"wrap",alignItems:"center",justifyContent:"space-between"}}>
+      <div className="player-header" style={{marginBottom:10,display:"flex",gap:10,flexWrap:"wrap",alignItems:"center",justifyContent:"space-between"}}>
         <div style={{display:"flex",gap:10,flexWrap:"wrap",opacity:.9}}>
           <span>Room <strong>{code}</strong></span>
           {room?.packTitle && <span>• {room.packTitle}</span>}
@@ -122,31 +122,35 @@ export default function PlayerGame(){
         <SoundMuteToggle />
       </div>
 
-      {q ? (
-        <>
-          <QuestionCard
-            q={q}
-            onChoose={answer}
-            disabled={locked}
-            revealIndex={reveal?.correctIndex}
-            wrongIndex={wrongIndex}
-            timeLeft={room?.status === "question" ? timeLeft : undefined}
-            qIndex={room?.ix}
-            qTotal={room?.total}
-          />
-          <div style={{marginTop:8,opacity:.8}}>
-            {room?.status==="question"
-              ? <>Time left: <strong>{timeLeft}s</strong></>
-              : reveal?.winner
-                ? <>Winner: <strong style={{color:"var(--good,#6ee7b7)"}}>{reveal.winner}</strong></>
-                : <>No correct answer.</>}
-          </div>
-        </>
-      ) : (
-        <div>Waiting for the Game Master to start…</div>
-      )}
+      <div className="player-question-section">
+        {q ? (
+          <>
+            <QuestionCard
+              q={q}
+              onChoose={answer}
+              disabled={locked}
+              revealIndex={reveal?.correctIndex}
+              wrongIndex={wrongIndex}
+              timeLeft={room?.status === "question" ? timeLeft : undefined}
+              qIndex={room?.ix}
+              qTotal={room?.total}
+            />
+            <div style={{marginTop:8,opacity:.8}}>
+              {room?.status==="question"
+                ? <>Time left: <strong>{timeLeft}s</strong></>
+                : reveal?.winner
+                  ? <>Winner: <strong style={{color:"var(--good,#6ee7b7)"}}>{reveal.winner}</strong></>
+                  : <>No correct answer.</>}
+            </div>
+          </>
+        ) : (
+          <div>Waiting for the Game Master to start…</div>
+        )}
+      </div>
 
-      <Scoreboard players={room?.players}/>
+      <div className="player-scoreboard-section">
+        <Scoreboard players={room?.players}/>
+      </div>
     </div>
   );
 }

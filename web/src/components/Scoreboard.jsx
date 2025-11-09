@@ -3,8 +3,8 @@ import React from "react";
 export default function Scoreboard({ players }){
   const sorted = [...(players||[])].sort((a,b)=>b.score-a.score);
   return (
-    <div style={{marginTop:"var(--spacing-md, 12px)",maxWidth:"100%",overflow:"hidden"}}>
-      <h3 style={{color:"#9aa6ff",margin:"var(--spacing-sm, 8px) 0",fontSize:"var(--font-lg, 18px)"}}>Scoreboard</h3>
+    <div style={{maxWidth:"100%",overflow:"hidden"}}>
+      <h3 style={{color:"#9aa6ff",margin:"clamp(4px, 1vh, 8px) 0",fontSize:"clamp(16px, 2.5vw, 20px)"}}>Scoreboard</h3>
       <div style={{display:"grid",gap:"var(--spacing-sm, 8px)",width:"100%"}}>
         {sorted.map((p, idx)=>(
           <div key={p.name} className="scoreboard-item" style={{

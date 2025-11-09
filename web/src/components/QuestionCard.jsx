@@ -30,8 +30,8 @@ export default function QuestionCard({
       background:"#0f1320",
       border:"1px solid #242b4a",
       borderRadius:14,
-      padding:"clamp(12px, 2vh, 20px)",
-      minHeight:120,
+      padding:"clamp(10px, 1.5vh, 20px)",
+      minHeight:0,
       maxWidth:"100%",
       overflow:"visible" /* Allow outlines to show */
     }}>
