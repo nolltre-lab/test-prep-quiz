@@ -141,65 +141,65 @@ body, p, h1, h2, h3, h4, h5, h6, span, div {
   }
 }
 
-/* Scoreboard responsive sizing */
+/* Scoreboard responsive sizing - scales with container */
 .scoreboard-item {
-  font-size: var(--font-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: clamp(14px, 2vw, 16px);
+  padding: clamp(8px, 1vh, 12px) clamp(10px, 1.5vw, 16px);
 }
 
 @media (min-width: 768px) {
   .scoreboard-item {
-    font-size: var(--font-base);
-    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: clamp(16px, 2.2vw, 20px);
+    padding: clamp(10px, 1.2vh, 16px) clamp(12px, 1.8vw, 20px);
   }
 }
 
 @media (min-width: 1200px) {
   .scoreboard-item {
-    font-size: var(--font-lg);
-    padding: var(--spacing-lg) var(--spacing-xl);
+    font-size: clamp(16px, 1.6vw, 22px);
+    padding: clamp(12px, 1.5vh, 20px) clamp(16px, 2vw, 28px);
   }
 }
 
-/* Question text responsive sizing */
+/* Question text responsive sizing - scales with container */
 .question-text {
-  font-size: var(--font-lg);
+  font-size: clamp(16px, 2.5vw, 24px);
   line-height: 1.4;
 }
 
 @media (min-width: 768px) {
   .question-text {
-    font-size: var(--font-xl);
+    font-size: clamp(18px, 2.8vw, 28px);
     line-height: 1.5;
   }
 }
 
 @media (min-width: 1200px) {
   .question-text {
-    font-size: var(--font-2xl);
+    font-size: clamp(20px, 2.2vw, 40px);
     line-height: 1.5;
   }
 }
 
-/* Answer button responsive sizing */
+/* Answer button responsive sizing - scales with container */
 .answer-button {
-  font-size: var(--font-sm);
-  padding: var(--spacing-md);
+  font-size: clamp(14px, 2vw, 18px);
+  padding: clamp(10px, 1.5vh, 16px);
   min-height: var(--touch-target);
 }
 
 @media (min-width: 768px) {
   .answer-button {
-    font-size: var(--font-base);
-    padding: var(--spacing-lg);
+    font-size: clamp(16px, 2.2vw, 20px);
+    padding: clamp(12px, 1.8vh, 20px);
   }
 }
 
 @media (min-width: 1200px) {
   .answer-button {
-    font-size: var(--font-lg);
-    padding: var(--spacing-xl);
-    min-height: 60px;
+    font-size: clamp(16px, 1.8vw, 24px);
+    padding: clamp(14px, 2vh, 24px);
+    min-height: clamp(50px, 6vh, 70px);
   }
 }
 
@@ -267,6 +267,7 @@ body, p, h1, h2, h3, h4, h5, h6, span, div {
     overflow-y: auto;
     overflow-x: hidden;
     min-height: 0;
+    padding-right: 8px; /* Space for scrollbar and to prevent cutoff */
   }
 
   .gm-scoreboard-area {
@@ -275,6 +276,7 @@ body, p, h1, h2, h3, h4, h5, h6, span, div {
     overflow-y: auto;
     overflow-x: hidden;
     min-height: 0;
+    padding-right: 8px; /* Space for scrollbar and to prevent cutoff */
   }
 }
 

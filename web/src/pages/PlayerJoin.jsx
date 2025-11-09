@@ -24,7 +24,8 @@ export default function PlayerJoin(){
           <div style={{
             display:"grid",
             gridTemplateColumns:"repeat(auto-fit, minmax(60px, 1fr))",
-            gap:"var(--spacing-sm, 8px)"
+            gap:"var(--spacing-sm, 8px)",
+            padding:"4px" /* Prevent border/scale cutoff */
           }}>
             {AVATARS.map(av => (
               <button

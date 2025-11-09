@@ -108,7 +108,8 @@ export default function GameMaster(){
           gap:"var(--spacing-md, 10px)",
           gridTemplateColumns:"repeat(auto-fit, minmax(min(100%, 200px), 1fr))",
           maxWidth:"100%",
-          width:"100%"
+          width:"100%",
+          padding:"4px" /* Prevent focus outline cutoff */
         }}>
           <div style={{gridColumn:"1 / -1"}}>
             <label style={{display:"block",marginBottom:"var(--spacing-xs, 6px)",opacity:.8,fontSize:"var(--font-sm, 14px)"}}>Pack</label>

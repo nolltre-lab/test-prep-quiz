@@ -17,15 +17,15 @@ export default function Scoreboard({ players }){
             transition:"all 0.3s"
           }}>
             <div style={{display:"flex",alignItems:"center",gap:"var(--spacing-md, 10px)",minWidth:0,flex:1}}>
-              <span style={{fontSize:"var(--font-2xl, 32px)",flexShrink:0}}>{p.avatar || "😀"}</span>
-              <div style={{fontSize:"var(--font-base, 16px)",wordWrap:"break-word",overflowWrap:"break-word",minWidth:0}}>
-                {idx === 0 && sorted.length > 1 && <span style={{marginRight:"var(--spacing-xs, 6px)",fontSize:"var(--font-lg, 20px)"}}>👑</span>}
+              <span style={{fontSize:"clamp(24px, 4vw, 40px)",flexShrink:0}}>{p.avatar || "😀"}</span>
+              <div style={{fontSize:"clamp(14px, 2vw, 18px)",wordWrap:"break-word",overflowWrap:"break-word",minWidth:0}}>
+                {idx === 0 && sorted.length > 1 && <span style={{marginRight:"var(--spacing-xs, 6px)",fontSize:"clamp(16px, 2.5vw, 24px)"}}>👑</span>}
                 {p.name}
               </div>
             </div>
             <strong style={{
               color: idx === 0 && sorted.length > 1 ? "var(--accent, #6ee7b7)" : "#6ee7b7",
-              fontSize:"var(--font-xl, 24px)"
+              fontSize:"clamp(20px, 3vw, 32px)"
             }}>{p.score}</strong>
           </div>
         ))}

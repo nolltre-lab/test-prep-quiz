@@ -30,10 +30,10 @@ export default function QuestionCard({
       background:"#0f1320",
       border:"1px solid #242b4a",
       borderRadius:14,
-      padding:"var(--spacing-lg, 18px)",
+      padding:"clamp(12px, 2vh, 20px)",
       minHeight:120,
       maxWidth:"100%",
-      overflow:"hidden"
+      overflow:"visible" /* Allow outlines to show */
     }}>
       {canShowHeader && (
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"var(--spacing-sm, 8px)",flexWrap:"wrap",gap:"var(--spacing-sm, 8px)"}}>
