@@ -142,7 +142,7 @@ function broadcastState(room){
     total: room.items.length,
     durationSec: room.durationSec,
     endsAt: room.endsAt,
-    players: [...room.players.values()].map(p => ({ name:p.name, score:p.score })),
+    players: [...room.players.values()].map(p => ({ name:p.name, score:p.score, avatar:p.avatar })),
     theme: room.theme ? {
       name: room.theme.name || "classic",
       vars: room.theme.vars || {},

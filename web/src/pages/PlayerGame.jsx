@@ -43,6 +43,7 @@ export default function PlayerGame(){
   const [locked,setLocked] = useState(false);
   const [theme,setTheme] = useState(null);
   const [showWinnerCelebration, setShowWinnerCelebration] = useState(false);
+  const [myAnswer, setMyAnswer] = useState(null); // Track player's answer choice
   const { confettiTrigger, fireConfetti } = useConfetti();
 
   const [now, setNow] = useState(Date.now());
@@ -66,7 +67,7 @@ export default function PlayerGame(){
         applyThemeToDocument(r.theme);
       }
     };
-    const onNew = (payload)=>{ setQ(payload.q); setLocked(false); setReveal(null); setShowWinnerCelebration(false); };
+    const onNew = (payload)=>{ setQ(payload.q); setLocked(false); setReveal(null); setShowWinnerCelebration(false); setMyAnswer(null); };
     const onReveal = (payload)=>{
       setReveal(payload);
       setLocked(true);
@@ -94,12 +95,16 @@ export default function PlayerGame(){
   const answer = (idx)=>{
     if(locked) return;
     setLocked(true);
+    setMyAnswer(idx); // Track what the player chose
     socket.emit("player:answer", { code, choiceIndex: idx }, (res)=>{
       if(!res?.ok){ /* ignore */ }
     });
   };
 
   const qNum = typeof room?.ix === "number" && room.ix >= 0 ? room.ix + 1 : 0;
+
+  // Show wrong answer in red if player answered incorrectly (before reveal)
+  const wrongIndex = !reveal && myAnswer !== null ? myAnswer : null;
 
   return (
     <div style={{position:"relative", zIndex:1, maxWidth:"100%", overflow:"hidden"}}>
@@ -124,6 +129,7 @@ export default function PlayerGame(){
             onChoose={answer}
             disabled={locked}
             revealIndex={reveal?.correctIndex}
+            wrongIndex={wrongIndex}
             timeLeft={room?.status === "question" ? timeLeft : undefined}
             qIndex={room?.ix}
             qTotal={room?.total}
