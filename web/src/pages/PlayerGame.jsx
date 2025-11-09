@@ -102,7 +102,7 @@ export default function PlayerGame(){
   const qNum = typeof room?.ix === "number" && room.ix >= 0 ? room.ix + 1 : 0;
 
   return (
-    <div style={{position:"relative", zIndex:1}}>
+    <div style={{position:"relative", zIndex:1, maxWidth:"100%", overflow:"hidden"}}>
       {theme && <ThemeOverlay effects={theme.effects} />}
       <ConfettiBurst trigger={confettiTrigger} />
       <WinnerCelebration show={showWinnerCelebration} winnerName={name} />

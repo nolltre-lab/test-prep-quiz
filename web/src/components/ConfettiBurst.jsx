@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from "react";
 
+// Helper to detect mobile and reduce particle count
+const isMobile = () => window.innerWidth < 768;
+
 export function ConfettiBurst({ trigger, onComplete }) {
   const [bursts, setBursts] = useState([]);
 
   useEffect(() => {
     if (trigger > 0) {
+      const particleCount = isMobile() ? 12 : 30; // Reduce particles on mobile
       const newBurst = {
         id: Date.now(),
-        particles: Array.from({ length: 30 }, (_, i) => ({
+        particles: Array.from({ length: particleCount }, (_, i) => ({
           id: i,
           emoji: ['🎉', '🎊', '✨', '⭐', '💫', '🌟'][Math.floor(Math.random() * 6)],
           x: Math.random() * 100 - 50,
@@ -54,7 +58,7 @@ export function ConfettiBurst({ trigger, onComplete }) {
               key={p.id}
               style={{
                 position: "absolute",
-                fontSize: "24px",
+                fontSize: isMobile() ? "18px" : "24px",
                 animation: `confetti-burst ${p.duration}s ease-out ${p.delay}s forwards`,
                 "--x": `${p.x}vw`,
                 "--y": `${p.y}vh`,

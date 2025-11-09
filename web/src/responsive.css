@@ -1,0 +1,263 @@
+/* Responsive Design for Mobile and Large Screens (TV/Chromecast) */
+
+/* Global box-sizing fix to prevent overflow issues */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Prevent inputs from overflowing on mobile */
+input, select, textarea, button {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Ensure all containers respect width constraints */
+div {
+  box-sizing: border-box;
+}
+
+/* Word wrapping for all text elements */
+body, p, h1, h2, h3, h4, h5, h6, span, div {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Base styles - Mobile first */
+:root {
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+
+  --font-xs: 12px;
+  --font-sm: 14px;
+  --font-base: 16px;
+  --font-lg: 18px;
+  --font-xl: 24px;
+  --font-2xl: 32px;
+  --font-3xl: 48px;
+
+  --touch-target: 44px; /* Minimum touch target size */
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+  :root {
+    --spacing-lg: 20px;
+    --spacing-xl: 32px;
+    --font-base: 18px;
+    --font-lg: 20px;
+    --font-xl: 28px;
+    --font-2xl: 36px;
+  }
+}
+
+/* Large screens (TV, projector) */
+@media (min-width: 1200px) {
+  :root {
+    --spacing-lg: 24px;
+    --spacing-xl: 40px;
+    --font-base: 20px;
+    --font-lg: 24px;
+    --font-xl: 32px;
+    --font-2xl: 48px;
+    --font-3xl: 64px;
+  }
+}
+
+/* Extra large screens (4K TV) - cap font sizes for better fit */
+@media (min-width: 1920px) {
+  :root {
+    --spacing-lg: 32px;
+    --spacing-xl: 48px;
+    --font-base: 22px;
+    --font-lg: 26px;
+    --font-xl: 34px;
+    --font-2xl: 44px;
+    --font-3xl: 60px;
+  }
+}
+
+/* Utility classes for responsive design */
+.responsive-grid {
+  display: grid;
+  gap: var(--spacing-md);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .responsive-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .responsive-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Touch-friendly buttons */
+.touch-target {
+  min-height: var(--touch-target);
+  min-width: var(--touch-target);
+}
+
+/* Hide on small screens */
+@media (max-width: 640px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+/* Hide on large screens */
+@media (min-width: 1200px) {
+  .hide-desktop {
+    display: none !important;
+  }
+}
+
+/* Scoreboard responsive sizing */
+.scoreboard-item {
+  font-size: var(--font-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .scoreboard-item {
+    font-size: var(--font-base);
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+}
+
+@media (min-width: 1200px) {
+  .scoreboard-item {
+    font-size: var(--font-lg);
+    padding: var(--spacing-lg) var(--spacing-xl);
+  }
+}
+
+/* Question text responsive sizing */
+.question-text {
+  font-size: var(--font-lg);
+  line-height: 1.4;
+}
+
+@media (min-width: 768px) {
+  .question-text {
+    font-size: var(--font-xl);
+    line-height: 1.5;
+  }
+}
+
+@media (min-width: 1200px) {
+  .question-text {
+    font-size: var(--font-2xl);
+    line-height: 1.5;
+  }
+}
+
+/* Answer button responsive sizing */
+.answer-button {
+  font-size: var(--font-sm);
+  padding: var(--spacing-md);
+  min-height: var(--touch-target);
+}
+
+@media (min-width: 768px) {
+  .answer-button {
+    font-size: var(--font-base);
+    padding: var(--spacing-lg);
+  }
+}
+
+@media (min-width: 1200px) {
+  .answer-button {
+    font-size: var(--font-lg);
+    padding: var(--spacing-xl);
+    min-height: 60px;
+  }
+}
+
+/* Reduce animations on mobile for performance */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Optimize theme overlays for mobile */
+@media (max-width: 640px) {
+  .theme-overlay {
+    opacity: 0.7; /* Slightly reduce intensity on mobile */
+  }
+
+  /* Reduce number of animated elements on mobile */
+  .theme-overlay > *:nth-child(n+8) {
+    display: none;
+  }
+}
+
+/* Large screen layout - expand container and fit to screen */
+@media (min-width: 1200px) {
+  .app-main {
+    max-width: 90vw !important;
+  }
+}
+
+/* Game Master mobile layout - stack vertically */
+.gm-game-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Game Master fit-to-screen layout for large displays */
+@media (min-width: 1200px) {
+  .gm-game-view {
+    display: grid;
+    grid-template-columns: 1fr minmax(350px, 400px);
+    grid-template-rows: minmax(auto, min-content) minmax(auto, min-content) minmax(0, 1fr);
+    gap: var(--spacing-lg);
+    max-height: calc(100vh - 100px);
+    overflow: hidden;
+  }
+
+  .gm-header {
+    grid-column: 1 / -1;
+    min-height: 0;
+  }
+
+  .gm-controls {
+    grid-column: 1 / -1;
+    min-height: 0;
+  }
+
+  .gm-question-area {
+    grid-column: 1;
+    grid-row: 3;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .gm-scoreboard-area {
+    grid-column: 2;
+    grid-row: 3;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+  }
+}
+
+/* Extra large screens - even wider scoreboard */
+@media (min-width: 1920px) {
+  .gm-game-view {
+    grid-template-columns: 1fr 500px;
+  }
+}

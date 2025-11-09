@@ -1,7 +1,18 @@
 import React from "react";
 
+// Helper to detect mobile and reduce animation counts for performance
+const isMobile = () => window.innerWidth < 768;
+const getCount = (desktopCount, mobileReduction = 0.5) => {
+  return isMobile() ? Math.max(1, Math.round(desktopCount * mobileReduction)) : desktopCount;
+};
+
 export function ThemeOverlay({ effects }) {
   if (!effects) return null;
+
+  // Disable theme overlays on mobile to reduce visual clutter and improve performance
+  if (isMobile()) {
+    return null;
+  }
 
   // HALLOWEEN THEME - Go absolutely nuts! 🎃👻🦇
   if (effects.halloween) {
@@ -10,7 +21,7 @@ export function ThemeOverlay({ effects }) {
 
   // Legacy effects for other themes (we'll enhance these next)
   if (effects.bats) {
-    const bats = Array.from({length: 10}, (_,i)=> i);
+    const bats = Array.from({length: getCount(10)}, (_,i)=> i);
     return (
       <div style={{position:"fixed", inset:0, pointerEvents:"none", overflow:"hidden", zIndex:0}}>
         <style>{`
@@ -34,7 +45,7 @@ export function ThemeOverlay({ effects }) {
   }
 
   if (effects.snow) {
-    const flakes = Array.from({length:40}, (_,i)=>i);
+    const flakes = Array.from({length:getCount(40, 0.4)}, (_,i)=>i);
     return (
       <div style={{position:"fixed", inset:0, pointerEvents:"none", overflow:"hidden", zIndex:0}}>
         <style>{`
@@ -58,7 +69,7 @@ export function ThemeOverlay({ effects }) {
   }
 
   if (effects.balloons) {
-    const balloons = Array.from({length: 15}, (_,i)=> i);
+    const balloons = Array.from({length: getCount(15)}, (_,i)=> i);
     const colors = ['🎈','🎈','🎈','🟣','🔵','🟢','🟡','🔴','🟠'];
     return (
       <div style={{position:"fixed", inset:0, pointerEvents:"none", overflow:"hidden", zIndex:0}}>
@@ -84,7 +95,7 @@ export function ThemeOverlay({ effects }) {
   }
 
   if (effects.confetti) {
-    const confetti = Array.from({length: 30}, (_,i)=> i);
+    const confetti = Array.from({length: getCount(30, 0.4)}, (_,i)=> i);
     const pieces = ['🎊','🎉','✨','⭐','💫'];
     return (
       <div style={{position:"fixed", inset:0, pointerEvents:"none", overflow:"hidden", zIndex:0}}>
@@ -109,7 +120,7 @@ export function ThemeOverlay({ effects }) {
   }
 
   if (effects.sparkles) {
-    const sparkles = Array.from({length: 25}, (_,i)=> i);
+    const sparkles = Array.from({length: getCount(25, 0.4)}, (_,i)=> i);
     return (
       <div style={{position:"fixed", inset:0, pointerEvents:"none", overflow:"hidden", zIndex:0}}>
         <style>{`
@@ -132,7 +143,7 @@ export function ThemeOverlay({ effects }) {
   }
 
   if (effects.rainbows) {
-    const rainbows = Array.from({length: 8}, (_,i)=> i);
+    const rainbows = Array.from({length: getCount(8)}, (_,i)=> i);
     return (
       <div style={{position:"fixed", inset:0, pointerEvents:"none", overflow:"hidden", zIndex:0}}>
         <style>{`
@@ -156,7 +167,7 @@ export function ThemeOverlay({ effects }) {
   }
 
   if (effects.stars) {
-    const stars = Array.from({length: 50}, (_,i)=> i);
+    const stars = Array.from({length: getCount(50, 0.3)}, (_,i)=> i);
     return (
       <div style={{position:"fixed", inset:0, pointerEvents:"none", overflow:"hidden", zIndex:0}}>
         <style>{`
@@ -204,7 +215,7 @@ export function ThemeOverlay({ effects }) {
   }
 
   if (effects.fish) {
-    const fish = Array.from({length: 12}, (_,i)=> i);
+    const fish = Array.from({length: getCount(12)}, (_,i)=> i);
     const fishEmojis = ['🐠','🐟','🐡','🦈','🐙','🦑'];
     return (
       <div style={{position:"fixed", inset:0, pointerEvents:"none", overflow:"hidden", zIndex:0}}>
@@ -229,7 +240,7 @@ export function ThemeOverlay({ effects }) {
   }
 
   if (effects.bubbles) {
-    const bubbles = Array.from({length: 30}, (_,i)=> i);
+    const bubbles = Array.from({length: getCount(30, 0.4)}, (_,i)=> i);
     return (
       <div style={{position:"fixed", inset:0, pointerEvents:"none", overflow:"hidden", zIndex:0}}>
         <style>{`
@@ -255,13 +266,14 @@ export function ThemeOverlay({ effects }) {
 }
 
 // EPIC HALLOWEEN OVERLAY - This is where we go CRAZY! 🎃
+// On mobile we reduce counts significantly for performance
 function HalloweenOverlay() {
-  // Multiple layers of spooky effects
-  const ghosts = Array.from({length: 8}, (_,i)=> i);
-  const bats = Array.from({length: 15}, (_,i)=> i);
-  const pumpkins = Array.from({length: 6}, (_,i)=> i);
-  const spiders = Array.from({length: 10}, (_,i)=> i);
-  const eyes = Array.from({length: 12}, (_,i)=> i);
+  // Multiple layers of spooky effects - reduced on mobile
+  const ghosts = Array.from({length: getCount(8, 0.4)}, (_,i)=> i);
+  const bats = Array.from({length: getCount(15, 0.3)}, (_,i)=> i);
+  const pumpkins = Array.from({length: getCount(6, 0.5)}, (_,i)=> i);
+  const spiders = Array.from({length: getCount(10, 0.3)}, (_,i)=> i);
+  const eyes = Array.from({length: getCount(12, 0.3)}, (_,i)=> i);
 
   return (
     <div style={{position:"fixed", inset:0, pointerEvents:"none", overflow:"hidden", zIndex:0}}>
@@ -310,28 +322,32 @@ function HalloweenOverlay() {
         }
       `}</style>
 
-      {/* Spooky fog layers */}
-      <div style={{
-        position:"absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: "40%",
-        background: "linear-gradient(to top, rgba(100, 0, 150, 0.4) 0%, transparent 100%)",
-        animation: "fog-drift 20s linear infinite",
-        filter: "blur(8px)"
-      }} />
+      {/* Spooky fog layers - reduced blur on mobile for performance */}
+      {!isMobile() && (
+        <>
+          <div style={{
+            position:"absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: "40%",
+            background: "linear-gradient(to top, rgba(100, 0, 150, 0.4) 0%, transparent 100%)",
+            animation: "fog-drift 20s linear infinite",
+            filter: "blur(8px)"
+          }} />
 
-      <div style={{
-        position:"absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: "30%",
-        background: "linear-gradient(to top, rgba(50, 0, 80, 0.3) 0%, transparent 100%)",
-        animation: "fog-drift 15s linear 5s infinite",
-        filter: "blur(12px)"
-      }} />
+          <div style={{
+            position:"absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: "30%",
+            background: "linear-gradient(to top, rgba(50, 0, 80, 0.3) 0%, transparent 100%)",
+            animation: "fog-drift 15s linear 5s infinite",
+            filter: "blur(12px)"
+          }} />
+        </>
+      )}
 
       {/* Spider webs in corners */}
       <div style={{

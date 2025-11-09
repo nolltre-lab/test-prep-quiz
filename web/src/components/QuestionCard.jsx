@@ -30,12 +30,14 @@ export default function QuestionCard({
       background:"#0f1320",
       border:"1px solid #242b4a",
       borderRadius:14,
-      padding:18,
-      minHeight:120
+      padding:"var(--spacing-lg, 18px)",
+      minHeight:120,
+      maxWidth:"100%",
+      overflow:"hidden"
     }}>
       {canShowHeader && (
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"var(--spacing-sm, 8px)",flexWrap:"wrap",gap:"var(--spacing-sm, 8px)"}}>
+          <div style={{display:"flex",gap:"var(--spacing-sm, 8px)",flexWrap:"wrap"}}>
             {typeof qIndex === "number" && typeof qTotal === "number" && (
               <span style={pillStyle}>Q <strong>{Math.max(0, qIndex + 1)}</strong> / {qTotal}</span>
             )}
@@ -46,9 +48,9 @@ export default function QuestionCard({
         </div>
       )}
 
-      <div style={{fontSize:18,lineHeight:1.35,marginBottom:12}}>{q.front}</div>
+      <div className="question-text" style={{marginBottom:"var(--spacing-md, 12px)",wordWrap:"break-word",overflowWrap:"break-word"}}>{q.front}</div>
 
-      <div style={{display:"grid",gap:10}}>
+      <div style={{display:"grid",gap:"var(--spacing-md, 10px)",width:"100%"}}>
         {q.choices.map((c, idx) => {
           const isReveal = revealIndex !== null;
           const isCorrect = isReveal && idx === revealIndex;
@@ -59,19 +61,23 @@ export default function QuestionCard({
               key={idx}
               onClick={() => onChoose && onChoose(idx)}
               disabled={disabled || isReveal}
+              className="answer-button touch-target"
               style={{
                 textAlign:"left",
                 background:"#22284a",
                 border:"1px solid #2f3869",
-                padding:"12px",
                 borderRadius:10,
                 cursor: (disabled || isReveal) ? "default" : "pointer",
                 outline: isCorrect
-                  ? "2px solid #6ee7b7"  // ✅ green on reveal
+                  ? "3px solid #6ee7b7"  // ✅ green on reveal (thicker for visibility on TV)
                   : isWrong
-                  ? "2px solid #ff6b6b"  // 🔴 red on wrong guess
+                  ? "3px solid #ff6b6b"  // 🔴 red on wrong guess
                   : "none",
-                color:"#e8ebff"
+                color:"#e8ebff",
+                transition:"all 0.2s ease",
+                wordWrap:"break-word",
+                overflowWrap:"break-word",
+                whiteSpace:"normal"
               }}
             >
               {c}
@@ -86,11 +92,11 @@ export default function QuestionCard({
 const pillStyle = {
   display:"inline-flex",
   alignItems:"center",
-  gap:6,
-  padding:"4px 10px",
+  gap:"var(--spacing-xs, 6px)",
+  padding:"var(--spacing-xs, 4px) var(--spacing-sm, 10px)",
   borderRadius:999,
   border:"1px solid #2b3361",
   background:"#141a34",
   color:"#9aa6ff",
-  fontSize:12
+  fontSize:"var(--font-xs, 12px)"
 };
