@@ -35,7 +35,9 @@ export default function EndScreen({ players = [], onClose, showCloseButton = fal
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        animation: `podium-rise 0.8s ease-out ${rank * 0.15}s both`
+        animation: `podium-rise 0.8s ease-out ${rank * 0.15}s forwards`,
+        opacity: 0,
+        transform: "translateY(100%)"
       }}>
         {/* Player info */}
         <div style={{
@@ -109,7 +111,8 @@ export default function EndScreen({ players = [], onClose, showCloseButton = fal
       alignItems: "center",
       justifyContent: "center",
       padding: "clamp(16px, 3vh, 32px)",
-      overflow: "auto"
+      overflow: "auto",
+      pointerEvents: "auto"
     }}>
       <style>{`
         @keyframes podium-rise {

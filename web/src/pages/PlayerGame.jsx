@@ -161,12 +161,8 @@ export default function PlayerGame(){
   const wrongIndex = !reveal && myAnswer !== null ? myAnswer : null;
 
   return (
-    <div className="player-game-container" style={{position:"relative", zIndex:1, maxWidth:"100%"}}>
-      {theme && <ThemeOverlay effects={theme.effects} />}
-      <ConfettiBurst trigger={confettiTrigger} />
-      <WinnerCelebration show={showWinnerCelebration} winnerName={name} />
-
-      {/* End Screen */}
+    <>
+      {/* End Screen - Render outside main container to avoid z-index stacking issues */}
       {gameEnded && room && (
         <EndScreen
           players={room.players || []}
@@ -175,7 +171,12 @@ export default function PlayerGame(){
         />
       )}
 
-      <div className="player-header" style={{marginBottom:10,display:"flex",gap:10,flexWrap:"wrap",alignItems:"center",justifyContent:"space-between"}}>
+      <div className="player-game-container" style={{position:"relative", zIndex:1, maxWidth:"100%"}}>
+        {theme && <ThemeOverlay effects={theme.effects} />}
+        <ConfettiBurst trigger={confettiTrigger} />
+        <WinnerCelebration show={showWinnerCelebration} winnerName={name} />
+
+        <div className="player-header" style={{marginBottom:10,display:"flex",gap:10,flexWrap:"wrap",alignItems:"center",justifyContent:"space-between"}}>
         <div style={{display:"flex",gap:10,flexWrap:"wrap",opacity:.9}}>
           <span>Room <strong>{code}</strong></span>
           {room?.packTitle && <span>• {room.packTitle}</span>}
@@ -214,6 +215,7 @@ export default function PlayerGame(){
       <div className="player-scoreboard-section">
         <Scoreboard players={room?.players}/>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

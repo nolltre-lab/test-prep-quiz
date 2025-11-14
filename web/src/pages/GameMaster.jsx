@@ -159,10 +159,8 @@ export default function GameMaster(){
   const maxQ = selected?.count || 1;
 
   return (
-    <div style={{position:"relative", zIndex:1, maxWidth:"100%", height:"100%", display:"flex", flexDirection:"column", overflow:"hidden"}}>
-      {theme && <ThemeOverlay effects={theme.effects} />}
-
-      {/* End Screen */}
+    <>
+      {/* End Screen - Render outside main container to avoid z-index stacking issues */}
       {gameEnded && room && (
         <EndScreen
           players={room.players || []}
@@ -171,7 +169,10 @@ export default function GameMaster(){
         />
       )}
 
-      <h2 style={{margin:"clamp(4px, 0.5vh, 6px) 0",flexShrink:0}}>Game Master</h2>
+      <div style={{position:"relative", zIndex:1, maxWidth:"100%", height:"100%", display:"flex", flexDirection:"column", overflow:"hidden"}}>
+        {theme && <ThemeOverlay effects={theme.effects} />}
+
+        <h2 style={{margin:"clamp(4px, 0.5vh, 6px) 0",flexShrink:0}}>Game Master</h2>
 
       {!room && (
         <div style={{
@@ -283,6 +284,7 @@ export default function GameMaster(){
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
