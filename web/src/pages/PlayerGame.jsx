@@ -8,6 +8,7 @@ import { ConfettiBurst, useConfetti } from "../components/ConfettiBurst.jsx";
 import { soundPlayer, SoundMuteToggle } from "../components/SoundEffects.jsx";
 import PlayerEndScreen from "../components/PlayerEndScreen.jsx";
 import BonusNotification from "../components/BonusNotification.jsx";
+import StreakBrokenNotification from "../components/StreakBrokenNotification.jsx";
 
 // Hook to keep screen awake during active questions
 function useWakeLock(isActive) {
@@ -96,6 +97,9 @@ export default function PlayerGame(){
   const { confettiTrigger, fireConfetti } = useConfetti();
   const [bonusInfo, setBonusInfo] = useState(null); // Track bonus points information
   const [showBonus, setShowBonus] = useState(false);
+  const [showStreakBroken, setShowStreakBroken] = useState(false);
+  const [brokenStreakValue, setBrokenStreakValue] = useState(0);
+  const previousStreakRef = useRef(0); // Track previous streak to detect breaks
 
   const [now, setNow] = useState(Date.now());
   useEffect(()=>{
@@ -109,6 +113,27 @@ export default function PlayerGame(){
   // Keep screen awake during active questions
   const isQuestionActive = q !== null && (room?.status === "question" || room?.status === "reveal");
   useWakeLock(isQuestionActive);
+
+  // Detect when streak is broken
+  useEffect(() => {
+    if (!room?.players || !name) return;
+
+    // Find current player's streak
+    const currentPlayer = room.players.find(p => p.name === name);
+    const currentStreak = currentPlayer?.streak || 0;
+    const previousStreak = previousStreakRef.current;
+
+    // Streak was broken if it dropped from 3+ to 0
+    if (previousStreak >= 3 && currentStreak === 0) {
+      setBrokenStreakValue(previousStreak);
+      setShowStreakBroken(true);
+      // Hide after 2.5 seconds
+      setTimeout(() => setShowStreakBroken(false), 2500);
+    }
+
+    // Update the ref for next comparison
+    previousStreakRef.current = currentStreak;
+  }, [room?.players, name]);
 
   useEffect(()=>{
     socket.emit("player:join", { code, name, avatar }, (res)=>{
@@ -190,6 +215,10 @@ export default function PlayerGame(){
           streakMultiplier={bonusInfo?.streakMultiplier}
           lightningMultiplier={bonusInfo?.lightningMultiplier}
           pointsEarned={bonusInfo?.pointsEarned}
+        />
+        <StreakBrokenNotification
+          show={showStreakBroken}
+          previousStreak={brokenStreakValue}
         />
 
         <div className="player-header" style={{marginBottom:10,display:"flex",gap:10,flexWrap:"wrap",alignItems:"center",justifyContent:"space-between"}}>
