@@ -178,10 +178,7 @@ export default function PlayerGame(){
     const onReveal = (payload)=>{
       setReveal(payload);
       setLocked(true);
-      if (payload.winner === name) {
-        fireConfetti();
-        soundPlayer.playCelebration();
-      }
+      // Confetti/sound now handled in answer callback for immediate feedback
     };
     const onEnd = ()=>{ setGameEnded(true); };
 
@@ -211,9 +208,15 @@ export default function PlayerGame(){
           speedBonus: res.speedBonus || 0,
           streakMultiplier: res.streakMultiplier || 1,
           lightningMultiplier: res.lightningMultiplier || 1,
-          pointsEarned: res.pointsEarned || 10
+          pointsEarned: res.pointsEarned || 10,
+          isWinner: res.isWinner || false
         });
         setShowBonus(true);
+        // Only fire confetti and celebration sound for winner
+        if(res.isWinner) {
+          fireConfetti();
+          soundPlayer.playCelebration();
+        }
         // Hide bonus notification after 3 seconds
         setTimeout(() => setShowBonus(false), 3000);
       }
@@ -244,6 +247,7 @@ export default function PlayerGame(){
           streakMultiplier={bonusInfo?.streakMultiplier}
           lightningMultiplier={bonusInfo?.lightningMultiplier}
           pointsEarned={bonusInfo?.pointsEarned}
+          isWinner={bonusInfo?.isWinner}
         />
         <StreakBrokenNotification
           show={showStreakBroken}

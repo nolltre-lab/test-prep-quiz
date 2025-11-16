@@ -9,13 +9,15 @@ import React from "react";
  *  - streakMultiplier: number - streak multiplier (1x, 2x, 3x)
  *  - lightningMultiplier: number - lightning round multiplier (1x or 2x)
  *  - pointsEarned: number - total points earned
+ *  - isWinner: boolean - whether this player was first (winner)
  */
 export default function BonusNotification({
   show,
   speedBonus = 0,
   streakMultiplier = 1,
   lightningMultiplier = 1,
-  pointsEarned = 10
+  pointsEarned = 10,
+  isWinner = true
 }) {
   if (!show) return null;
 
@@ -107,8 +109,19 @@ export default function BonusNotification({
         fontWeight: 700,
         color: "#0f1320"
       }}>
-        🎉 Correct! 🎉
+        {isWinner ? "🎉 Correct! You won! 🎉" : "✅ Correct! ✅"}
       </div>
+
+      {!isWinner && (
+        <div style={{
+          marginTop: "clamp(8px, 1.5vh, 12px)",
+          fontSize: "clamp(12px, 2vw, 16px)",
+          color: "#0f1320",
+          opacity: 0.8
+        }}>
+          Someone else answered first
+        </div>
+      )}
     </div>
   );
 }
