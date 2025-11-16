@@ -126,7 +126,8 @@ function makeRoom({ code, pack, items, theme, isPublic = true }) {
     timer: null,
     endsAt: 0,
     durationSec: 30,
-    players: new Map(), // socketId -> {name, score, lastQ: -1, answered:false}
+    players: new Map(), // socketId -> {name, score, lastQ: -1, answered:false, playerId}
+    playersByPlayerId: new Map(), // playerId -> socketId (for reconnection)
     gm: null,
     theme: theme || null, // full theme object
     totalOverride: null,  // optional if you carry total from GM; not used here
@@ -323,22 +324,50 @@ io.on("connection", (socket)=>{
     cb?.({ ok:true });
   });
 
-  // Player: join
-  socket.on("player:join", ({ code, name, avatar }, cb)=>{
+  // Player: join (with reconnection support)
+  socket.on("player:join", ({ code, name, avatar, playerId }, cb)=>{
     const room = rooms.get((code||"").trim().toUpperCase());
     if(!room) return cb?.({ ok:false, error:"room_not_found" });
+
     socket.join(room.code);
-    room.players.set(socket.id, {
-      name: String(name||"Player").slice(0,24),
-      avatar: String(avatar||"😀").slice(0,2),
-      score:0,
-      answered:false,
-      lastQ:-1,
-      streak:0  // Track consecutive correct answers for streak bonus
-    });
+
+    // Check if this player is reconnecting
+    let player = null;
+    let isReconnect = false;
+
+    if(playerId && room.playersByPlayerId.has(playerId)){
+      // Reconnecting player - restore their session
+      const oldSocketId = room.playersByPlayerId.get(playerId);
+      player = room.players.get(oldSocketId);
+
+      if(player){
+        isReconnect = true;
+        // Remove old socket ID entry
+        room.players.delete(oldSocketId);
+        // Update to new socket ID
+        room.players.set(socket.id, player);
+        room.playersByPlayerId.set(playerId, socket.id);
+      }
+    }
+
+    // New player or reconnect failed
+    if(!player){
+      player = {
+        name: String(name||"Player").slice(0,24),
+        avatar: String(avatar||"😀").slice(0,2),
+        score:0,
+        answered:false,
+        lastQ:-1,
+        streak:0,  // Track consecutive correct answers for streak bonus
+        playerId: playerId || socket.id
+      };
+      room.players.set(socket.id, player);
+      room.playersByPlayerId.set(player.playerId, socket.id);
+    }
+
     broadcastState(room);
     broadcastPublicRooms(); // Player count changed - update public list
-    cb?.({ ok:true, room:{ code:room.code, packTitle:room.packTitle }, theme: room.theme?.name });
+    cb?.({ ok:true, room:{ code:room.code, packTitle:room.packTitle }, theme: room.theme?.name, playerId: player.playerId, isReconnect });
   });
 
   // Player: answer (with speed bonus, streak tracking, and lightning round multipliers)
@@ -415,7 +444,7 @@ io.on("connection", (socket)=>{
     }
   });
 
-  // Disconnect cleanup
+  // Disconnect cleanup (with grace period for reconnection)
   socket.on("disconnect", ()=>{
     let needsBroadcast = false;
     for(const room of rooms.values()){
@@ -427,9 +456,23 @@ io.on("connection", (socket)=>{
         break;
       }
       if(room.players.has(socket.id)){
-        room.players.delete(socket.id);
-        broadcastState(room);
-        needsBroadcast = true;
+        const player = room.players.get(socket.id);
+        const playerId = player?.playerId;
+
+        // Give player 30 seconds to reconnect before removing
+        setTimeout(() => {
+          // Check if player reconnected (socket.id would be different)
+          const currentSocketId = room.playersByPlayerId?.get(playerId);
+          if (currentSocketId === socket.id) {
+            // Player didn't reconnect, remove them
+            room.players?.delete(socket.id);
+            room.playersByPlayerId?.delete(playerId);
+            if(room) {
+              broadcastState(room);
+              broadcastPublicRooms();
+            }
+          }
+        }, 30000); // 30 second grace period
       }
     }
     if (needsBroadcast) {

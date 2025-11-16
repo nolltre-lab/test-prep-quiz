@@ -5,6 +5,7 @@ import Scoreboard from "../components/Scoreboard.jsx";
 import QuestionCard from "../components/QuestionCard.jsx";
 import { ThemeOverlay } from "../components/ThemeOverlay.jsx";
 import EndScreen from "../components/EndScreen.jsx";
+import { QRCodeSVG } from "qrcode.react";
 
 // Hook to keep screen awake during active questions
 function useWakeLock(isActive) {
@@ -116,7 +117,13 @@ export default function GameMaster(){
     };
     const onNew = (payload)=>{ setQ(payload.q); setReveal(null); };
     const onReveal = (payload)=> setReveal(payload);
-    const onEnd = ()=>{ setQ(null); setReveal(null); setGameEnded(true); };
+    const onEnd = ()=>{
+      console.log("GameMaster: Game ended. Room state:", room);
+      console.log("GameMaster: Players in room:", room?.players);
+      setQ(null);
+      setReveal(null);
+      setGameEnded(true);
+    };
     const onAuto = ()=> {
       // GM can choose to go next automatically or manually;
       // here we auto-press next for convenience
@@ -286,8 +293,35 @@ export default function GameMaster(){
             )}
           </div>
 
-          <div className="gm-scoreboard-area">
-            <Scoreboard players={room.players}/>
+          <div className="gm-scoreboard-area" style={{display:"flex",gap:"var(--spacing-md, 12px)",alignItems:"flex-start"}}>
+            <div style={{flex:1}}>
+              <Scoreboard players={room.players}/>
+            </div>
+
+            {/* QR Code for players to join */}
+            <div style={{
+              background:"var(--panel,#12172b)",
+              border:"2px solid var(--accent, #6ee7b7)",
+              borderRadius:8,
+              padding:"var(--spacing-sm, 8px)",
+              display:"flex",
+              flexDirection:"column",
+              alignItems:"center",
+              gap:"var(--spacing-xs, 4px)",
+              flexShrink:0
+            }}>
+              <div style={{fontSize:"var(--font-xs, 11px)",fontWeight:600,color:"var(--accent, #6ee7b7)"}}>
+                Scan to Join
+              </div>
+              <div style={{background:"white",padding:"4px",borderRadius:4}}>
+                <QRCodeSVG
+                  value={`${window.location.origin}/play?room=${room.code}`}
+                  size={80}
+                  level="M"
+                  includeMargin={false}
+                />
+              </div>
+            </div>
           </div>
         </div>
       )}

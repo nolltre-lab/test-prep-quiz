@@ -81,11 +81,22 @@ function applyThemeToDocument(theme) {
   } catch {}
 }
 
+// Generate or retrieve persistent player ID
+function getPlayerId() {
+  let playerId = localStorage.getItem('quiz-player-id');
+  if (!playerId) {
+    playerId = `player-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem('quiz-player-id', playerId);
+  }
+  return playerId;
+}
+
 export default function PlayerGame(){
   const { code, name } = useParams();
   const [searchParams] = useSearchParams();
   const avatar = searchParams.get('avatar') || '😀';
   const nav = useNavigate();
+  const playerIdRef = useRef(getPlayerId());
 
   const [room,setRoom] = useState(null);
   const [q,setQ] = useState(null);
@@ -136,9 +147,25 @@ export default function PlayerGame(){
   }, [room?.players, name]);
 
   useEffect(()=>{
-    socket.emit("player:join", { code, name, avatar }, (res)=>{
-      if(!res?.ok){ alert("Could not join (bad code?)"); nav("/play"); }
-    });
+    const joinRoom = () => {
+      socket.emit("player:join", { code, name, avatar, playerId: playerIdRef.current }, (res)=>{
+        if(!res?.ok){
+          alert("Could not join (bad code?)");
+          nav("/play");
+        } else if(res.isReconnect) {
+          console.log("Reconnected successfully! Progress restored.");
+        }
+      });
+    };
+
+    // Initial join
+    joinRoom();
+
+    // Handle reconnection on disconnect/reconnect
+    const onReconnect = () => {
+      console.log("Socket reconnected, rejoining room...");
+      joinRoom();
+    };
 
     const onUpdate = (r)=> {
       setRoom(r);
@@ -158,18 +185,20 @@ export default function PlayerGame(){
     };
     const onEnd = ()=>{ setGameEnded(true); };
 
+    socket.on("connect", onReconnect);
     socket.on("room:update", onUpdate);
     socket.on("question:new", onNew);
     socket.on("question:reveal", onReveal);
     socket.on("game:ended", onEnd);
 
     return ()=>{
+      socket.off("connect", onReconnect);
       socket.off("room:update", onUpdate);
       socket.off("question:new", onNew);
       socket.off("question:reveal", onReveal);
       socket.off("game:ended", onEnd);
     };
-  }, [code, name, nav]);
+  }, [code, name, avatar, nav, fireConfetti]);
 
   const answer = (idx)=>{
     if(locked) return;

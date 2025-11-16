@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { socket } from "../socket";
 
 const AVATARS = ["😀", "🤩", "😎", "🥳", "🤓", "🦸", "🦄", "🐱", "🐶", "🐼", "🦊", "🐯", "🦁", "🐸", "🐵", "🦉"];
 
 export default function PlayerJoin(){
-  const [mode, setMode] = useState("browse"); // "browse" or "code"
+  const [searchParams] = useSearchParams();
+  const roomParam = searchParams.get('room');
+
+  const [mode, setMode] = useState(roomParam ? "code" : "browse"); // "browse" or "code"
   const [publicRooms, setPublicRooms] = useState([]);
-  const [code,setCode] = useState("");
+  const [code,setCode] = useState(roomParam || "");
   const [name,setName] = useState("");
   const [avatar,setAvatar] = useState(AVATARS[0]);
   const nav = useNavigate();
