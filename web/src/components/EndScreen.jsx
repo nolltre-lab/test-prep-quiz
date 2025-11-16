@@ -21,8 +21,13 @@ export default function EndScreen({ players = [], onClose, showCloseButton = fal
 
   console.log("EndScreen: Valid players after filtering:", validPlayers);
 
-  // Sort by score descending
-  const sorted = [...validPlayers].sort((a, b) => (b.score || 0) - (a.score || 0));
+  // Sort by score descending, then alphabetically by name for stable ordering
+  const sorted = [...validPlayers].sort((a, b) => {
+    // Primary sort: by score (descending)
+    if (b.score !== a.score) return b.score - a.score;
+    // Secondary sort: by name (alphabetical ascending)
+    return (a.name || '').localeCompare(b.name || '');
+  });
 
   const first = sorted[0];
   const second = sorted[1];

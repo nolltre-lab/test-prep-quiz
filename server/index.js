@@ -149,7 +149,8 @@ function broadcastState(room){
       name:p.name,
       score:p.score,
       avatar:p.avatar,
-      streak:p.streak || 0  // Include streak for UI display
+      streak:p.streak || 0,  // Include streak for UI display
+      playerId:p.playerId  // Include stable ID for React keys
     })),
     theme: room.theme ? {
       name: room.theme.name || "classic",

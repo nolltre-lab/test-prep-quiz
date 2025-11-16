@@ -14,7 +14,12 @@ export default function PlayerEndScreen({ players = [], onClose }) {
     soundPlayer.playCelebration();
   }, []);
 
-  const sorted = [...players].sort((a, b) => b.score - a.score);
+  const sorted = [...players].sort((a, b) => {
+    // Primary sort: by score (descending)
+    if (b.score !== a.score) return b.score - a.score;
+    // Secondary sort: by name (alphabetical ascending) for stable ordering
+    return (a.name || '').localeCompare(b.name || '');
+  });
 
   // Medal emojis for top 3
   const getMedal = (index) => {

@@ -1,13 +1,18 @@
 import React from "react";
 
 export default function Scoreboard({ players }){
-  const sorted = [...(players||[])].sort((a,b)=>b.score-a.score);
+  const sorted = [...(players||[])].sort((a,b)=> {
+    // Primary sort: by score (descending)
+    if (b.score !== a.score) return b.score - a.score;
+    // Secondary sort: by name (alphabetical ascending) for stable ordering
+    return (a.name || '').localeCompare(b.name || '');
+  });
   return (
     <div style={{maxWidth:"100%",overflow:"hidden"}}>
       <h3 style={{color:"#9aa6ff",margin:"clamp(2px, 0.5vh, 6px) 0",fontSize:"clamp(14px, 2.2vw, 18px)"}}>Scoreboard</h3>
       <div style={{display:"grid",gap:"clamp(4px, 0.5vh, 8px)",width:"100%"}}>
         {sorted.map((p, idx)=>(
-          <div key={p.name} className="scoreboard-item" style={{
+          <div key={p.playerId || p.name} className="scoreboard-item" style={{
             display:"flex",
             justifyContent:"space-between",
             alignItems:"center",
