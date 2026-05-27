@@ -63,6 +63,10 @@ export default function QuestionCard({
   const shuffledRevealIndex = revealIndex !== null ? originalToShuffled[revealIndex] : null;
   const shuffledWrongIndex = wrongIndex !== null ? originalToShuffled[wrongIndex] : null;
 
+  // Use a 2×2 grid when all answers are short enough to fit side-by-side
+  const isCompact = shuffledChoices.length === 4 &&
+    Math.max(...shuffledChoices.map(c => c.length)) <= 12;
+
   const canShowHeader = (typeof timeLeft === "number") || (typeof qIndex === "number" && typeof qTotal === "number");
 
   return (
@@ -118,9 +122,19 @@ export default function QuestionCard({
         </div>
       )}
 
-      <div className="question-text" style={{marginBottom:"clamp(6px, 1vh, 12px)",wordWrap:"break-word",overflowWrap:"break-word"}}>{q.front}</div>
+      <div className="question-text" style={{marginBottom:"clamp(6px, 1vh, 12px)",wordWrap:"break-word",overflowWrap:"break-word",flexShrink:0}}>{q.front}</div>
 
-      <div style={{display:"grid",gap:"clamp(6px, 1vh, 12px)",width:"100%"}}>
+      <div style={{
+        display:"grid",
+        gap:"clamp(6px, 1vh, 10px)",
+        width:"100%",
+        flex:1,
+        minHeight:0,
+        gridTemplateColumns: isCompact ? "1fr 1fr" : "1fr",
+        gridTemplateRows: isCompact
+          ? "1fr 1fr"
+          : `repeat(${shuffledChoices.length}, 1fr)`,
+      }}>
         {shuffledChoices.map((c, shuffledIdx) => {
           const isReveal = shuffledRevealIndex !== null;
           const isCorrect = isReveal && shuffledIdx === shuffledRevealIndex;
@@ -131,7 +145,6 @@ export default function QuestionCard({
               key={shuffledIdx}
               onClick={() => {
                 if (onChoose) {
-                  // Convert shuffled index back to original index before calling onChoose
                   const originalIdx = indexMap[shuffledIdx];
                   onChoose(originalIdx);
                 }
@@ -139,21 +152,29 @@ export default function QuestionCard({
               disabled={disabled || isReveal}
               className="answer-button touch-target"
               style={{
-                textAlign:"left",
+                display:"flex",
+                alignItems:"center",
+                justifyContent: isCompact ? "center" : "flex-start",
                 background:"#22284a",
                 border:"1px solid #2f3869",
                 borderRadius:10,
                 cursor: (disabled || isReveal) ? "default" : "pointer",
                 outline: isCorrect
-                  ? "3px solid #6ee7b7"  // ✅ green on reveal (thicker for visibility on TV)
+                  ? "3px solid #6ee7b7"
                   : isWrong
-                  ? "3px solid #ff6b6b"  // 🔴 red on wrong guess
+                  ? "3px solid #ff6b6b"
                   : "none",
                 color:"#e8ebff",
                 transition:"all 0.2s ease",
                 wordWrap:"break-word",
                 overflowWrap:"break-word",
-                whiteSpace:"normal"
+                whiteSpace:"normal",
+                width:"100%",
+                height:"100%",
+                ...(isCompact && {
+                  fontSize:"clamp(22px, 5vw, 40px)",
+                  fontWeight:700,
+                })
               }}
             >
               {c}
