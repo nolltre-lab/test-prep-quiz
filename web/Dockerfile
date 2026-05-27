@@ -4,6 +4,8 @@ WORKDIR /web
 COPY package.json package-lock.json* ./
 RUN npm ci || npm i
 COPY . .
+ARG VITE_BASE_PATH=/
+ENV VITE_BASE_PATH=${VITE_BASE_PATH}
 # Run linting to catch errors like missing imports
 RUN npm run lint
 # Build with default VITE_SERVER empty (we'll use nginx proxy)

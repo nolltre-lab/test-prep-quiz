@@ -111,6 +111,7 @@ export default function PlayerGame(){
   const [showStreakBroken, setShowStreakBroken] = useState(false);
   const [brokenStreakValue, setBrokenStreakValue] = useState(0);
   const previousStreakRef = useRef(0); // Track previous streak to detect breaks
+  const [myAnswerWasWrong, setMyAnswerWasWrong] = useState(false); // Track if answer was wrong
 
   const [now, setNow] = useState(Date.now());
   useEffect(()=>{
@@ -174,7 +175,7 @@ export default function PlayerGame(){
         applyThemeToDocument(r.theme);
       }
     };
-    const onNew = (payload)=>{ setQ(payload.q); setLocked(false); setReveal(null); setMyAnswer(null); setShowBonus(false); setBonusInfo(null); };
+    const onNew = (payload)=>{ setQ(payload.q); setLocked(false); setReveal(null); setMyAnswer(null); setMyAnswerWasWrong(false); setShowBonus(false); setBonusInfo(null); };
     const onReveal = (payload)=>{
       setReveal(payload);
       setLocked(true);
@@ -219,6 +220,9 @@ export default function PlayerGame(){
         }
         // Hide bonus notification after 3 seconds
         setTimeout(() => setShowBonus(false), 3000);
+      } else if(res?.ok && !res?.correct) {
+        // Mark answer as wrong to show red border
+        setMyAnswerWasWrong(true);
       }
     });
   };
@@ -226,7 +230,8 @@ export default function PlayerGame(){
   const qNum = typeof room?.ix === "number" && room.ix >= 0 ? room.ix + 1 : 0;
 
   // Show wrong answer in red if player answered incorrectly (before reveal)
-  const wrongIndex = !reveal && myAnswer !== null ? myAnswer : null;
+  // Only show red if answer was confirmed as wrong
+  const wrongIndex = !reveal && myAnswerWasWrong ? myAnswer : null;
 
   return (
     <>

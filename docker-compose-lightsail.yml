@@ -1,0 +1,21 @@
+services:
+  server:
+    image: ${DOCKER_REPO_SERVER:-iqesolutions/test-prep-quiz-server}:latest
+    container_name: test-prep-quiz-server
+    restart: always
+    # No exposed ports — only reachable by web via internal compose network
+
+  web:
+    image: ${DOCKER_REPO_WEB:-iqesolutions/test-prep-quiz-web}:latest
+    container_name: test-prep-quiz-web
+    restart: always
+    depends_on:
+      - server
+    networks:
+      - default
+      - iqe-proxy-net
+    # No exposed ports — Caddy on iqe-proxy-net routes to this container
+
+networks:
+  iqe-proxy-net:
+    external: true

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { socket } from "../socket";
+import { socket, serverURL } from "../socket";
 import { listPacks } from "../api";
 import Scoreboard from "../components/Scoreboard.jsx";
 import QuestionCard from "../components/QuestionCard.jsx";
@@ -104,7 +104,7 @@ export default function GameMaster(){
 
   useEffect(()=>{
     // fetch available themes
-    fetch("/api/themes").then(r=>r.json()).then(d=> setThemes(d.themes || []));
+    fetch(`${serverURL}/api/themes`).then(r=>r.json()).then(d=> setThemes(d.themes || []));
   },[]);
 
   useEffect(()=>{
@@ -315,7 +315,7 @@ export default function GameMaster(){
               </div>
               <div style={{background:"white",padding:"4px",borderRadius:4}}>
                 <QRCodeSVG
-                  value={`${window.location.origin}/play?room=${room.code}`}
+                  value={`${window.location.origin}${window.location.pathname.split('/').slice(0, -1).join('/')}/play?room=${room.code}`}
                   size={80}
                   level="M"
                   includeMargin={false}

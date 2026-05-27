@@ -420,7 +420,7 @@ io.on("connection", (socket)=>{
         player.score += finalScore;
 
         broadcastState(room);
-        return cb?.({ ok:true, correct:true, isWinner:true, speedBonus, streakMultiplier, lightningMultiplier, pointsEarned: finalScore });
+        cb?.({ ok:true, correct:true, isWinner:true, speedBonus, streakMultiplier, lightningMultiplier, pointsEarned: finalScore });
       } else {
         // Not first - reduced points, no streak
         player.streak = 0;
@@ -430,18 +430,33 @@ io.on("connection", (socket)=>{
         player.score += finalScore;
 
         broadcastState(room);
-        return cb?.({ ok:true, correct:true, isWinner:false, speedBonus, streakMultiplier:1, lightningMultiplier, pointsEarned: finalScore });
+        cb?.({ ok:true, correct:true, isWinner:false, speedBonus, streakMultiplier:1, lightningMultiplier, pointsEarned: finalScore });
       }
     } else {
       // Wrong answer
       player.score -= 1;
       player.streak = 0;
       broadcastState(room);
-      return cb?.({ ok:true, correct:false });
+      cb?.({ ok:true, correct:false });
     }
 
-    // Note: Timer handles reveal when time expires
-    // No need to check "all answered" here since we want timer to continue
+    // Check if all players have answered - if so, reveal immediately
+    const allAnswered = [...room.players.values()].length > 0 &&
+                        [...room.players.values()].every(p => p.answered && p.lastQ === room.ix);
+    if (allAnswered) {
+      room.lock = true;
+      room.status = "reveal";
+      clearTimeout(room.timer);
+      io.to(room.code).emit("question:reveal", {
+        correctIndex: currentCorrectIndex(room),
+        winner: room.winnerName || null
+      });
+      broadcastState(room);
+      // auto-advance after 5s if GM doesn't press Next
+      setTimeout(()=> {
+        if(room.status === "reveal") io.to(room.code).emit("gm:auto-next", {});
+      }, 5000);
+    }
   });
 
   // Disconnect cleanup (with grace period for reconnection)
